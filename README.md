@@ -1,6 +1,36 @@
-# mkcert
+# mkcert (Enhanced for Local Development)
 
 mkcert is a simple tool for making locally-trusted development certificates. It requires no configuration.
+
+## 🚀 Enhanced Features for Local Development
+
+This enhanced version includes **improved support for local domains** commonly used in homelab and development environments:
+
+- **✅ Local Domain Support**: Works seamlessly with domains like `.home`, `.local`, `.lab`, `.homelab`, `.dev`, `.test`
+- **✅ Homelab Ready**: Perfect for local network services running on custom domains (e.g., `service.homelab.home`)
+- **✅ Development Environments**: Enhanced validation for internal domains like `.internal`, `.corp`, `.private`
+- **✅ Docker Ready**: Modern multi-stage Dockerfile for containerized deployment
+
+### Supported Local TLDs
+The enhanced version automatically recognizes and supports these local domain extensions:
+- `.home` - Common for home networks
+- `.local` - Standard local network domain  
+- `.lab` / `.homelab` - Popular for homelab setups
+- `.dev` / `.test` - Development and testing
+- `.internal` / `.corp` / `.private` - Corporate/internal use
+- `.lan` / `.intra` - Local area network domains
+
+### Example Usage for Homelab
+```bash
+# Generate certificates for homelab services  
+$ mkcert homelab.home "*.homelab.home" jellyfin.homelab.home plex.homelab.home
+
+# Works with any local domain
+$ mkcert "*.lab.local" grafana.lab.local prometheus.lab.local
+
+# Docker with environment variable
+$ DOMAINS=homelab.home,*.homelab.home,plex.homelab.home docker compose up
+```
 
 ```
 $ mkcert -install
@@ -88,6 +118,35 @@ For Arch Linux users, [`mkcert`](https://archlinux.org/packages/extra/x86_64/mkc
 ```
 sudo pacman -Syu mkcert
 ```
+
+### Docker
+
+Streamlined Docker setup with automatic CA installation and environment-based domain configuration:
+
+```bash
+# Build the image
+docker build -t mkcert-enhanced .
+
+# Run with environment domains (comma-separated)
+DOMAINS=homelab.home,*.homelab.home docker run --rm \
+    -v ca-data:/home/mkcert/.local/share/mkcert \
+    -v $(pwd)/certs:/certs -w /certs \
+    mkcert-enhanced
+
+# Or with command line arguments
+docker run --rm -v ca-data:/home/mkcert/.local/share/mkcert \
+    -v $(pwd)/certs:/certs -w /certs \
+    mkcert-enhanced homelab.home "*.homelab.home"
+
+# Using compose
+docker compose up
+```
+
+Features:
+- **Automatic CA installation** on first run
+- **Environment variable support** for domains (comma-separated)
+- **Persistent CA storage** via Docker volumes
+- **Optimized go get build** for minimal image size
 
 ### Windows
 

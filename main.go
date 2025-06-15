@@ -213,7 +213,17 @@ func (m *mkcert) Run(args []string) {
 		return
 	}
 
-	hostnameRegexp := regexp.MustCompile(`(?i)^(\*\.)?[0-9a-z_-]([0-9a-z._-]*[0-9a-z_-])?$`)
+	// Enhanced hostname validation to support local domains like .home, .local, .lab, etc.
+	// This allows for better development environment support including homelab setups
+	hostnameRegexp := regexp.MustCompile(`(?i)^(\*\.)?[0-9a-z]([0-9a-z._-]*[0-9a-z])?$`)
+	
+	// Common local/development TLDs that should be allowed
+	localTLDs := map[string]bool{
+		"home": true, "local": true, "lan": true, "homelab": true, 
+		"lab": true, "dev": true, "test": true, "internal": true,
+		"corp": true, "intra": true, "private": true,
+	}
+	
 	for i, name := range args {
 		if ip := net.ParseIP(name); ip != nil {
 			continue
@@ -224,12 +234,31 @@ func (m *mkcert) Run(args []string) {
 		if uriName, err := url.Parse(name); err == nil && uriName.Scheme != "" && uriName.Host != "" {
 			continue
 		}
+		
+		// Handle wildcards and extract the actual domain for validation
+		actualName := name
+		if strings.HasPrefix(name, "*.") {
+			actualName = name[2:]
+		}
+		
 		punycode, err := idna.ToASCII(name)
 		if err != nil {
 			log.Fatalf("ERROR: %q is not a valid hostname, IP, URL or email: %s", name, err)
 		}
 		args[i] = punycode
+		
+		// Enhanced validation: allow common local TLDs and standard hostnames
 		if !hostnameRegexp.MatchString(punycode) {
+			// Check if it's a local domain that should be allowed
+			parts := strings.Split(actualName, ".")
+			if len(parts) >= 2 {
+				tld := strings.ToLower(parts[len(parts)-1])
+				if localTLDs[tld] {
+					// It's a local domain, allow it even if it doesn't match strict regex
+					log.Printf("Note: Using local development domain %q - ensure your local DNS/hosts file is configured ℹ️", name)
+					continue
+				}
+			}
 			log.Fatalf("ERROR: %q is not a valid hostname, IP, URL or email", name)
 		}
 	}

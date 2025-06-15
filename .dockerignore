@@ -1,0 +1,48 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+docs/
+examples/
+
+# Development files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files
+*_test.go
+test/
+tests/
+
+# Temporary files
+*.tmp
+*.log
+
+# Build artifacts (we build inside container)
+mkcert
+*.exe
+dist/
+build/
+
+# Docker
+Dockerfile*
+.dockerignore
+docker-compose*
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# License and readme (not needed for build)
+LICENSE
+AUTHORS 

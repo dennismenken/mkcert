@@ -1,0 +1,13 @@
+services:
+  mkcert:
+    image: dennismenken/mkcert-enhanced:latest
+    user: "0:0"  # Run as root for automatic permission handling
+    environment:
+      - DOMAINS=${DOMAINS}
+    volumes:
+      - ca-data:/home/mkcert/.local/share/mkcert
+      - ./certs:/certs
+    working_dir: /certs
+
+volumes:
+  ca-data: 
